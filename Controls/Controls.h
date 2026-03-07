@@ -21,20 +21,11 @@ enum class PreferredAppMode
 
 #pragma endregion
 #pragma region Function Signatures
-using fnRtlGetNtVersionNumbers = void (WINAPI*)(LPDWORD major, LPDWORD minor, LPDWORD build);
-// 1809 17763
-using fnShouldAppsUseDarkMode = bool (WINAPI*)(); // ordinal 132
-using fnAllowDarkModeForWindow = bool (WINAPI*)(HWND hWnd, bool allow); // ordinal 133
-using fnFlushMenuThemes = void (WINAPI*)(); // ordinal 136
-using fnAllowDarkModeForApp = bool (WINAPI*)(bool allow); // ordinal 135, in 1809
-using fnRefreshImmersiveColorPolicyState = void (WINAPI*)(); // ordinal 104
-using fnIsDarkModeAllowedForWindow = bool (WINAPI*)(HWND hWnd); // ordinal 137
-using fnGetIsImmersiveColorUsingHighContrast = bool (WINAPI*)(IMMERSIVE_HC_CACHE_MODE mode); // ordinal 106
-using fnOpenNcThemeData = HTHEME(WINAPI*)(HWND hWnd, LPCWSTR pszClassList); // ordinal 49
-// 1903 18362
-using fnShouldSystemUseDarkMode = bool (WINAPI*)(); // ordinal 138
-using fnSetPreferredAppMode = PreferredAppMode(WINAPI*)(PreferredAppMode appMode); // ordinal 135, in 1903
-using fnIsDarkModeAllowedForApp = bool (WINAPI*)(); // ordinal 139
+typedef HTHEME(WINAPI* OpenNcThemeData_t)(HWND hWnd, LPCWSTR pszClassList); // ordinal 49
+typedef PreferredAppMode(WINAPI* SetPreferredAppMode_t)(PreferredAppMode); // ordinal 135
+typedef bool (WINAPI* ShouldAppsUseDarkMode_t)(); // ordinal 132
+typedef bool (WINAPI* AllowDarkModeForWindowWithParentFallback_t)(HWND, bool); // ordinal 145
+
 #pragma endregion
 
 HINSTANCE hInst;
