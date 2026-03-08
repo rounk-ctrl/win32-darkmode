@@ -8,7 +8,6 @@ OpenNcThemeData_t OpenNcThemeData;
 ShouldAppsUseDarkMode_t ShouldAppsUseDarkMode;
 AllowDarkModeForWindowWithParentFallback_t AllowDarkModeForWindowWithParentFallback;
 
-DWORD g_buildNumber = 0;
 BOOL IsDarkMode = FALSE;
 #pragma endregion
 namespace DarkMode
@@ -194,33 +193,6 @@ namespace DarkMode
 
 	}
 
-	bool IsHighContrast()
-	{
-		HIGHCONTRASTW highContrast = { sizeof(highContrast) };
-		if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(highContrast), &highContrast, FALSE))
-			return highContrast.dwFlags & HCF_HIGHCONTRASTON;
-		return false;
-	}
-	int IsExplorerDarkTheme()
-	{
-		HKEY hKeyPersonalization;
-		RegOpenKeyEx(
-			HKEY_CURRENT_USER,
-			L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-			0, KEY_READ, &hKeyPersonalization
-		);
-		DWORD dwBufferSize(sizeof(DWORD));
-		DWORD nResult(0);
-		LONG nError = RegQueryValueEx(
-			hKeyPersonalization,
-			L"AppsUseLightTheme",
-			0,
-			NULL,
-			reinterpret_cast<LPBYTE>(&nResult),
-			&dwBufferSize
-		);
-		return ERROR_SUCCESS == nError ? !nResult : FALSE;
-	}
 	void InitDarkMode()
 	{
 		HMODULE hUxtheme = LoadLibraryEx(L"uxtheme.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -233,29 +205,17 @@ namespace DarkMode
 
 			SetPreferredAppMode(PreferredAppMode::AllowDark);
 			IsDarkMode = ShouldAppsUseDarkMode();
-
 		}
 	}
 
 	void UpdateTitleBar(HWND hWnd)
 	{
-
 		if (IsDarkMode)
 		{
-			if (g_buildNumber >= 17763 && g_buildNumber < 18362)
-			{
-				SetProp(hWnd, L"UseImmersiveDarkModeColors", reinterpret_cast<HANDLE>(static_cast<INT_PTR>(IsDarkMode)));
-			}
-			else if (g_buildNumber >= 18362 && g_buildNumber < 19041)
-			{
-				DwmSetWindowAttribute(hWnd, 19, &IsDarkMode, sizeof(IsDarkMode));
-			}
-			else if (g_buildNumber >= 19041)
-			{
-				DwmSetWindowAttribute(hWnd, 20, &IsDarkMode, sizeof(IsDarkMode));
-			}
+			DwmSetWindowAttribute(hWnd, 20, &IsDarkMode, sizeof(IsDarkMode));
 		}
 	}
+
 	void FixDarkScrollBar()
 	{
 		HMODULE hComctl = LoadLibraryExW(L"comctl32.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -274,7 +234,7 @@ namespace DarkMode
 							classList = L"Explorer::ScrollBar";
 						}
 						return OpenNcThemeData(hWnd, classList);
-						};
+					};
 
 					addr->u1.Function = reinterpret_cast<ULONG_PTR>(static_cast<OpenNcThemeData_t>(MyOpenThemeData));
 					VirtualProtect(addr, sizeof(IMAGE_THUNK_DATA), oldProtect, &oldProtect);
